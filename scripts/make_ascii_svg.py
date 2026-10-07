@@ -84,6 +84,25 @@ def to_ascii(img):
     return rows
 
 
+def trim_blank(rows, pad=2):
+    """Drop all-blank edge rows/cols so the figure fills the frame."""
+    def blank(line):
+        return set(line.strip()) == set() or line.strip() == ""
+    top = 0
+    while top < len(rows) - 1 and blank(rows[top]):
+        top += 1
+    bottom = len(rows)
+    while bottom > top + 1 and blank(rows[bottom - 1]):
+        bottom -= 1
+    rows = rows[max(0, top - pad):bottom + pad]
+    cols = [0, len(rows[0])]
+    while cols[0] < cols[1] - 1 and all(r[cols[0]] == " " for r in rows):
+        cols[0] += 1
+    while cols[1] > cols[0] + 1 and all(r[cols[1] - 1] == " " for r in rows):
+        cols[1] -= 1
+    return [r[max(0, cols[0] - pad):cols[1] + pad] for r in rows]
+
+
 def svg(rows, static_mode):
     height = len(rows)
     W = COLS * CHAR_W + 2 * 16
@@ -135,10 +154,13 @@ def svg(rows, static_mode):
 def main():
     static_mode = os.environ.get("STATIC") == "1"
     img = load_source()
-    rows = to_ascii(img)
+    rows = trim_blank(to_ascii(img))
+    # normalize lengths (trim may leave ragged edges)
+    width = max(len(r) for r in rows)
+    rows = [r.ljust(width) for r in rows]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(svg(rows, static_mode))
-    print(f"wrote {OUT} ({len(rows)} rows × {COLS} cols, "
+    print(f"wrote {OUT} ({len(rows)} rows × {width} cols, "
           f"source={'photo' if PREPPED.exists() else 'initials fallback'})")
 
 

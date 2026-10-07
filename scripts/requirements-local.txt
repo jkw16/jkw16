@@ -1,0 +1,5 @@
+# Local-only deps (photo/ASCII generation; CI never installs these)
+pillow
+numpy
+opencv-python
+rembg

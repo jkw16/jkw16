@@ -13,6 +13,7 @@ import json
 import os
 from datetime import date, timedelta
 from pathlib import Path
+from xml.etree import ElementTree
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -172,6 +173,7 @@ def main():
 </svg>'''
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    ElementTree.fromstring(svg)  # fail loudly on malformed SVG before it ships
     OUT.write_text(svg)
     print(f"wrote {OUT} ({len(positions)} cells, weeks={max_col}, h={height:.0f})")
 

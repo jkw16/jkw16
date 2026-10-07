@@ -7,6 +7,7 @@ Content lives in the CARD dict below — edit it when your focus changes.
 
 import os
 from pathlib import Path
+from xml.etree import ElementTree
 
 OUT = Path(__file__).resolve().parent.parent / "assets" / "info-card.svg"
 
@@ -66,11 +67,11 @@ def main():
             anim = f'class="{cls}"'
         lines.append(
             f'<text x="{x_key}" y="{y:.0f}" font-family="{FONT}" font-size="13" '
-            f'fill="{color}" font-weight="bold"{anim}>{esc(key)}:</text>'
+            f'fill="{color}" font-weight="bold" {anim}>{esc(key)}:</text>'
         )
         lines.append(
             f'<text x="{x_key + 110}" y="{y:.0f}" font-family="{FONT}" font-size="13" '
-            f'fill="{FG}"{anim}>{esc(value)}</text>'
+            f'fill="{FG}" {anim}>{esc(value)}</text>'
         )
         y += 26
         delay += 0.15
@@ -112,6 +113,7 @@ def main():
 </svg>'''
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    ElementTree.fromstring(svg)  # fail loudly on malformed SVG before it ships
     OUT.write_text(svg)
     print(f"wrote {OUT} (static={static_mode})")
 

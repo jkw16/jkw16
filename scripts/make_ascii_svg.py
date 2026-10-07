@@ -15,6 +15,7 @@ Output: assets/ascii-portrait.svg
 
 import os
 from pathlib import Path
+from xml.etree import ElementTree
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -159,6 +160,7 @@ def main():
     width = max(len(r) for r in rows)
     rows = [r.ljust(width) for r in rows]
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    ElementTree.fromstring(svg(rows, static_mode))  # fail loudly on malformed SVG
     OUT.write_text(svg(rows, static_mode))
     print(f"wrote {OUT} ({len(rows)} rows × {width} cols, "
           f"source={'photo' if PREPPED.exists() else 'initials fallback'})")

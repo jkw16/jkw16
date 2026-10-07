@@ -10,6 +10,12 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "assets" / "info-card.svg"
 
+
+def esc(text):
+    return (
+        text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    )
+
 W, H = 490, 300
 BG = "#0d1117"
 BORDER = "#30363d"
@@ -60,11 +66,11 @@ def main():
             anim = f'class="{cls}"'
         lines.append(
             f'<text x="{x_key}" y="{y:.0f}" font-family="{FONT}" font-size="13" '
-            f'fill="{color}" font-weight="bold"{anim}>{key}:</text>'
+            f'fill="{color}" font-weight="bold"{anim}>{esc(key)}:</text>'
         )
         lines.append(
             f'<text x="{x_key + 110}" y="{y:.0f}" font-family="{FONT}" font-size="13" '
-            f'fill="{FG}"{anim}>{value}</text>'
+            f'fill="{FG}"{anim}>{esc(value)}</text>'
         )
         y += 26
         delay += 0.15

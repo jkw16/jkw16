@@ -8,3 +8,5 @@ assets/source-photo.*
 
 # scratch
 .DS_Store
+# prepped derivative of the personal photo — keep local only like the original
+assets/source-prepped.png

@@ -16,7 +16,7 @@
 <text x="30" y="40" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#c9d1d9" font-weight="bold">joshua@mac</text>
 <text x="30" y="62" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8b949e">──────────────────────────────────────</text>
 <text x="30" y="88" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#79c0ff" font-weight="bold"class="row02">Role:</text>
-<text x="140" y="88" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#c9d1d9"class="row02">App builder & security researcher</text>
+<text x="140" y="88" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#c9d1d9"class="row02">App builder &amp; security researcher</text>
 <text x="30" y="114" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#a5d6ff" font-weight="bold"class="row04">Now:</text>
 <text x="140" y="114" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#c9d1d9"class="row04">Push bridges · bug hunting · tooling</text>
 <text x="30" y="140" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#7ee787" font-weight="bold"class="row06">Stack:</text>

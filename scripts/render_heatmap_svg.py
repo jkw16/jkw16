@@ -83,7 +83,10 @@ def month_labels(days):
         dt = date.fromisoformat(day["date"])
         month = dt.strftime("%Y-%m")
         if month != last:
-            labels.append((dt.strftime("%b"), (dt - sunday0).days // 7))
+            idx = (dt - sunday0).days // 7
+            # skip labels that would collide with the previous one
+            if not labels or idx - labels[-1][1] >= 3:
+                labels.append((dt.strftime("%b"), idx))
             last = month
     return labels
 

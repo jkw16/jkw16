@@ -38,21 +38,36 @@ def main(argv):
 
         cut = remove(img)
         alpha = cut[:, :, 3]
-        subject = cut[:, :, :3][alpha > 0]
-        if subject.size:
-            mean = subject.reshape(-1, 3).mean(axis=0)
-        else:
-            mean = np.array([255, 255, 255])
-        white = np.full_like(img, 255)
-        mask = (alpha[:, :, None] / 255.0)
-        img = (cut[:, :, :3] * mask + white * (1 - mask)).astype(np.uint8)
+        if (alpha > 0).any():
+            white = np.full_like(img, 255)
+            mask = (alpha[:, :, None] / 255.0)
+            img = (cut[:, :, :3] * mask + white * (1 - mask)).astype(np.uint8)
     except ImportError:
         print("rembg not installed — skipping background removal")
 
-    # square-crop around the center, then downscale for the char grid
+    # face-aware square crop: center on a detected face when one exists,
+    # otherwise fall back to a crop anchored in the upper third (portrait bias)
     h, w = img.shape[:2]
-    side = min(h, w)
-    y0, x0 = (h - side) // 2, (w - side) // 2
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    detector = cv2.CascadeClassifier(
+        cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    )
+    faces = detector.detectMultiScale(gray, 1.1, 5, minSize=(60, 60))
+    cy_frac, side = 0.5, min(h, w)
+    if len(faces):
+        fx, fy, fw, fh = max(faces, key=lambda f: f[2] * f[3])
+        cy = fy + fh / 2
+        # widen so head+shoulders fit inside the square
+        side = min(w, h, int(fw * 2.8))
+        cy_frac = (cy - side / 2) / h
+        cy_frac = min(max(cy_frac, 0.0), 1.0)
+    else:
+        cy_frac = 0.28
+    side = min(w, h)
+    # clamp when the face sits near the top edge
+    y0 = int(cy_frac * h - side / 2)
+    y0 = sorted((0, y0, h - side))[1]
+    x0 = (w - side) // 2
     img = img[y0:y0 + side, x0:x0 + side]
 
     # CLAHE on L channel — brings out facial contours for ASCII

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Scrape the public contributions calendar for a GitHub user.
+"""Fetch the contributions calendar for a GitHub user.
+
+Primary path is the GraphQL API with a token (GITHUB_TOKEN) — always fresh.
+Falls back to scraping GitHub's public contributions HTML page, which GitHub
+serves from a cache that can lag several days.
 
 Writes data/contributions.json with raw days plus streaks, best day,
-and monthly totals. No auth — GitHub's public contributions HTML page.
+and monthly totals.
 
 Usage: fetch_contributions.py [username]   (default: GITHUB_USER or 'jkw16')
 """
@@ -19,8 +23,54 @@ from bs4 import BeautifulSoup
 HERE = Path(__file__).resolve().parent
 DATA_DIR = HERE.parent / "data"
 PAGE_URL = "https://github.com/users/{user}/contributions"
+GRAPHQL_URL = "https://api.github.com/graphql"
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (profile-readme-refresh)"}
+
+GRAPHQL_QUERY = """
+query($login: String!) {
+  user(login: $login) {
+    contributionsCollection {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            date
+            contributionCount
+            color
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+def fetch_graphql(user, token):
+    """Authenticity-fresh path: GraphQL contributionsCollection."""
+    resp = requests.post(
+        GRAPHQL_URL,
+        json={"query": GRAPHQL_QUERY, "variables": {"login": user}},
+        headers={"Authorization": f"Bearer {token}", **HEADERS},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    body = resp.json()
+    if body.get("errors"):
+        raise RuntimeError(f"GraphQL error: {body['errors'][0].get('message')}")
+    calendar = body["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+    raw = {"weeks": calendar["weeks"]}
+    return flatten_days(raw)
+
+
+def parse_days_from_html(html_text):
+    """HTML path: parse either the embedded React JSON or the <td> calendar."""
+    html = BeautifulSoup(html_text, "html.parser")
+    raw = _embedded_json(html)
+    if raw is not None:
+        return flatten_days(raw)
+    return _fallback_days(html)
 
 
 def _embedded_json(html):
@@ -63,7 +113,11 @@ def _fallback_days(html):
         days.append(
             {"date": cell["data-date"], "count": count, "level": int(cell.get("data-level") or 0)}
         )
-    return days if days else None
+    # GitHub's calendar table is written column-major (one <tr> per weekday);
+    # restore date order and drop any duplicates before returning.
+    days.sort(key=lambda d: d["date"])
+    deduped = {d["date"]: d for d in days}
+    return list(deduped.values()) if days else None
 
 
 def flatten_days(raw):
@@ -127,21 +181,29 @@ def compute_stats(days):
 
 def main():
     user = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("GITHUB_USER", "jkw16")
-    resp = requests.get(PAGE_URL.format(user=user), headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    html = BeautifulSoup(resp.text, "html.parser")
 
-    raw = _embedded_json(html)
-    if raw is not None:
-        days = flatten_days(raw)
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if token:
+        try:
+            days = fetch_graphql(user, token)
+            source = "graphql"
+        except Exception as exc:  # noqa: BLE001
+            print(f"GraphQL fetch failed ({exc}); falling back to HTML scrape", file=sys.stderr)
     else:
-        days = _fallback_days(html)
+        days = None
+
+    if not days:
+        resp = requests.get(PAGE_URL.format(user=user), headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        days = parse_days_from_html(resp.text)
+        source = "html-scrape"
     if not days:
         sys.exit("no contribution days parsed — GitHub markup may have changed")
 
     payload = {
         "user": user,
         "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "source": source,
         "days": days,
         **compute_stats(days),
     }

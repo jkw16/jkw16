@@ -1,43 +1,8 @@
 {
   "user": "jkw16",
-  "fetched_at": "2026-11-21T14:37:59.926277+00:00",
+  "fetched_at": "2026-11-22T14:32:47.977695+00:00",
   "source": "graphql",
   "days": [
-    {
-      "date": "2025-11-16",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-17",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-18",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-19",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-20",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-21",
-      "count": 0,
-      "color": "#ebedf0"
-    },
-    {
-      "date": "2025-11-22",
-      "count": 0,
-      "color": "#ebedf0"
-    },
     {
       "date": "2025-11-23",
       "count": 0,
@@ -1855,17 +1820,22 @@
     },
     {
       "date": "2026-11-21",
+      "count": 1,
+      "color": "#9be9a8"
+    },
+    {
+      "date": "2026-11-22",
       "count": 0,
       "color": "#ebedf0"
     }
   ],
-  "total": 80,
+  "total": 81,
   "best_day": {
     "date": "2026-10-07",
     "count": 10,
     "color": "#216e39"
   },
-  "current_streak": 9,
+  "current_streak": 10,
   "longest_streak": 30,
   "monthly_totals": {
     "2025-11": 0,
@@ -1880,6 +1850,6 @@
     "2026-08": 0,
     "2026-09": 14,
     "2026-10": 49,
-    "2026-11": 14
+    "2026-11": 15
   }
 }
